@@ -5,10 +5,30 @@ const jsonFilePath = './CountriesData.json';
  * @param {string} param - The name of the query parameter containing the country name.
  * @returns {string|null} - The country name, or null if the parameter doesn't exist.
  */
-function getQueryParameter(param) {
+const getQueryParameter = (param) => {
     const params = new URLSearchParams(window.location.search);
     return params.get(param);
+};
+
+/**
+ * Removes all child elements from a given parent container.
+ *
+ * This function iterates through all child nodes of the specified parent container
+ * and removes them one by one using the `removeChild` method. It ensures that the
+ * parent container is emptied of all its children.
+ *
+ * @param {HTMLElement} parentContainer - The parent container whose child elements are to be removed.
+ *                                        If the parent container is null or undefined, the function does nothing.
+ */
+function clearAllChildrenFromParent(parentContainer) {
+    if (!parentContainer) return;
+
+    while (parentContainer.firstChild) {
+        const firstChildElement = parentContainer.firstChild; // Get the first child element
+        parentContainer.removeChild(firstChildElement); // Remove the first child element explicitly
+    }
 }
+
 
 /**
  * Fetches and parses JSON data from a given file path.
@@ -102,10 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
     const toggleButton = document.querySelector('.theme-toggle');
     const themeText = toggleButton.querySelector('.theme-text');
+    const THEME_DARK = 'dark';
+    const THEME_LIGHT = 'light';
 
     // Retrieve the saved theme from localStorage
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    if (savedTheme === THEME_DARK) {
         // Apply dark theme if previously saved as dark
         body.classList.add('dark-theme');
         themeText.textContent = 'Light Mode'; // Update toggle text to reflect current theme
@@ -117,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toggle theme on button click
     toggleButton.addEventListener('click', () => {
         const isDark = body.classList.toggle('dark-theme'); // Toggle dark theme class
-        localStorage.setItem('theme', isDark ? 'dark' : 'light'); // Save updated theme in localStorage
+        localStorage.setItem('theme', isDark ? THEME_DARK : THEME_LIGHT);
         themeText.textContent = isDark ? 'Light Mode' : 'Dark Mode'; // Update toggle text
     });
 });
@@ -125,26 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-/**
- * Creates a reusable toast element and appends it to the DOM.
- * @returns {HTMLElement} The created toast element.
- */
-function createToast() {
-    const toast = document.createElement('div');
-    toast.id = 'toast'; // Assign a unique ID
-    toast.style.position = 'fixed';
-    toast.style.bottom = '10px';
-    toast.style.left = '50%';
-    toast.style.transform = 'translateX(-50%)';
-    toast.style.backgroundColor = '#444';
-    toast.style.color = '#fff';
-    toast.style.padding = '8px 15px';
-    toast.style.borderRadius = '4px';
-    toast.style.fontSize = '14px';
-    toast.style.display = 'none';
-    document.body.appendChild(toast);
-    return toast;
-}
+
 
 /**
  * Displays a toast notification with the given message.
@@ -153,18 +156,19 @@ function createToast() {
  */
 function showToast(message) {
     let toast = document.getElementById('toast');
-    if (!toast) {
-        toast = createToast(); // Create the toast element if it doesn't exist
-    }
-    toast.textContent = message;
-    toast.style.display = 'block';
-    toast.style.opacity = '1';
 
-    // Remove the toast after 1 second
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+    }
+
+    // Set the message and make the toast visible
+    toast.textContent = message;
+    toast.classList.add('visible');
+
     setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => {
-            toast.style.display = 'none';
-        }, 300);
-    }, 1000); // Duration changed to 1 second
+        toast.classList.remove('visible'); // Remove the visibility class
+    }, 1000);
 }

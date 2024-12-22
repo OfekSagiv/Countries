@@ -5,26 +5,28 @@
  * - Displays the country's details or logs an error if not found.
  * - Hides the loader after completing the process.
  */
-document.addEventListener('DOMContentLoaded', () => {
-    const countryDetailsSection = document.querySelector('.country-details');
+document.addEventListener('DOMContentLoaded', async () => {
+    const countryDetailsSection = document.getElementById('country-details-id');
     const loader = document.querySelector('.loader');
     const countryName = getQueryParameter('name');
 
     if (!countryName) {
         hideLoader(loader);
-        return logError('No country name in URL');
+        return console.error('No country name in URL');
     }
 
-    fetchData(jsonFilePath)
-        .then((countries) => {
-            const country = findCountryByName(countries, countryName);
-            if (!country) throw new Error(`Country with name "${countryName}" not found!`);
+    try {
+        const countries = await fetchData(jsonFilePath); // Await fetching the data
+        const country = findCountryByName(countries, countryName); // Find the country
+        if (!country) throw new Error(`Country with name "${countryName}" not found!`);
 
-            clearElementContent(countryDetailsSection);
-            countryDetailsSection.appendChild(createCountryElement(country, {isGrid: false}));
-        })
-        .catch((error) => logError(error.message || 'Error fetching country details'))
-        .finally(() => hideLoader(loader));
+        clearAllChildrenFromParent(countryDetailsSection); // Clear previous content
+        countryDetailsSection.appendChild(createCountryElement(country, { isGrid: false })); // Append new content
+    } catch (error) {
+        console.error('Error fetching country details:', error); // Handle errors
+    } finally {
+        hideLoader(loader); // Always hide the loader
+    }
 });
 
 /** Hides the loader element. */
@@ -34,15 +36,6 @@ function hideLoader(loader) {
 
 /** Finds a country by name in a list of countries. */
 function findCountryByName(countries, name) {
-    return countries.find((country) => country.name === name) || null;
+    return countries.find((country) => country.name === name);
 }
 
-/** Clears the content of an HTML element. */
-function clearElementContent(element) {
-    if (element) element.innerHTML = '';
-}
-
-/** Logs an error message to the console. */
-function logError(message) {
-    console.error(message);
-}

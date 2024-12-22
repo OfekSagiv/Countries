@@ -4,16 +4,15 @@
  * - Builds and displays the grid of countries.
  * - Logs an error if data fetching fails.
  */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const gridElement = document.querySelector('.countries-grid');
 
-    fetchData(jsonFilePath)
-        .then((countries) => {
-            buildCountriesGrid(countries, gridElement, true);
-        })
-        .catch((error) => {
-            console.error('Error initializing grid:', error);
-        });
+    try {
+        const countries = await fetchData(jsonFilePath); // Await fetching the data
+        buildCountriesGrid(countries, gridElement, true); // Build the grid with the fetched data
+    } catch (error) {
+        console.error('Error initializing grid:', error); // Handle any errors
+    }
 });
 
 /**
@@ -23,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * @param {boolean} isGrid - If true, builds a grid view; otherwise, a single country view.
  */
 function buildCountriesGrid(countries, targetElement, isGrid = true) {
-    targetElement.innerHTML = ''; // Clear existing content
+    clearAllChildrenFromParent(targetElement);
     countries.forEach((country) => {
         const countryElement = createCountryElement(country, {isGrid});
         targetElement.appendChild(countryElement);
